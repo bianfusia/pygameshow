@@ -8,6 +8,7 @@ import pygame
 from openpyxl import load_workbook
 
 questions = []
+teamkey_list = []
 
 wb = load_workbook(filename = 'questions.xlsx')
 
@@ -24,6 +25,7 @@ pygame.init()
 #to set full screen
 #win = pygame.display.set_mode((1280,720),pygame.FULLSCREEN)
 win = pygame.display.set_mode((1280,720))
+winsur = pygame.display.get_surface()
 #player number, can make module to edit this in future for any no of players.
 player_no = 2
 allplayer = {}
@@ -40,6 +42,8 @@ def Inputtextbox():
     text = ''
     done = False
     textinput = ''
+    samename = ''
+    samenameint = 0
 
     while not done:
         for event in pygame.event.get():
@@ -57,8 +61,13 @@ def Inputtextbox():
             if event.type == pygame.KEYDOWN:
                 if active:
                     if event.key == pygame.K_RETURN:
-                        textinput = text
+                        for player in allplayer:
+                            if allplayer[player][0] == text:
+                                samenameint += 1
+                                samename = samenameint
+                        textinput = text + str(samename)
                         text = ''
+                        samename = False
                         return textinput
                     elif event.key == pygame.K_BACKSPACE:
                         text = text[:-1]
@@ -87,11 +96,22 @@ def Inputtextbox():
 #change background color
 red = [219,124,124]
 white = [255,255,255]
-green = [204,255,153]
+green = [102,204,0]
+grey = [160,160,160]
+yellow = [255,255,0]
 win.fill(red)
 text = "Welcome to Bianfusia Game Show!"
 text2 = "press any key to continue..."
 font = pygame.font.Font('freesansbold.ttf', 30)
+spacing = 40
+width = 1280
+height = 720
+while spacing < width:
+    pygame.draw.circle(winsur, grey, (spacing,40), 20)
+    pygame.draw.circle(winsur, grey, (spacing,720-40), 20)
+    spacing += 80
+#recttop = pygame.Rect(0,0,1280,30)
+#winsur.fill(white,recttop)
 textSurface = font.render(text, True, white)
 textSurface2 = font.render(text2, True, white)
 win.blit(textSurface,(350,300))
@@ -100,33 +120,54 @@ pygame.display.flip()
 
 player = 1
 points = 0
+spacing = 40
+prespacing = 1240
+clock = pygame.time.Clock()
 
 while player <= player_no:
-        for event in pygame.event.get():
-                if event.type == pygame.KEYDOWN:
-                    teamname = Inputtextbox()
-                    win.fill(red)
-                    text = "Welcome " + teamname + "!"
-                    text2 = "Please register your team key!"
-                    textSurface = font.render(text, True, white)
-                    textSurface2 = font.render(text2, True, white)
-                    win.blit(textSurface,(350,300))
-                    win.blit(textSurface2,(400,450))
-                    pygame.display.flip()
-                    done = False
-                    while not done:
-                        for event in pygame.event.get():
-                            if event.type == pygame.KEYDOWN:
-                                teamkey = event.key
-                                win.fill(red)
-                                text = teamname + " key registered!"
+    if spacing >= 1280:
+        spacing = 40
+    pygame.draw.circle(winsur, grey, (prespacing,40), 20)
+    pygame.draw.circle(winsur, yellow, (spacing,40), 20)
+    pygame.draw.circle(winsur, grey, (prespacing,720-40), 20)
+    pygame.draw.circle(winsur, yellow, (spacing,720-40), 20)
+    spacing += 80
+    prespacing += 80
+    if prespacing >= 1280:
+        prespacing = 40
+    for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+                teamname = Inputtextbox()
+                win.fill(red)
+                text = "Welcome " + teamname + "!"
+                text2 = "Please register your team key!"
+                textSurface = font.render(text, True, white)
+                textSurface2 = font.render(text2, True, white)
+                win.blit(textSurface,(350,300))
+                win.blit(textSurface2,(400,450))
+                pygame.display.flip()
+                done = False
+                while not done:
+                    for event in pygame.event.get():
+                        if event.type == pygame.KEYDOWN and event.type != pygame.MOUSEBUTTONDOWN:
+                            if event.key in teamkey_list and event.type != pygame.MOUSEBUTTONDOWN:
+                                text = "team key taken. Please try another key."
                                 textSurface = font.render(text, True, white)
-                                win.blit(textSurface,(350,300))
+                                win.blit(textSurface,(400,650))
                                 pygame.display.flip()
-                                allplayer[player] = [teamname,teamkey,points]
-                                done = True
-                    
-                    player += 1
+                                continue
+                            teamkey = event.key
+                            teamkey_list.append(teamkey)
+                            win.fill(red)
+                            text = teamname + " key registered!"
+                            textSurface = font.render(text, True, white)
+                            win.blit(textSurface,(350,300))
+                            pygame.display.flip()
+                            allplayer[player] = [teamname,teamkey,points]
+                            done = True
+                player += 1
+    pygame.display.flip()
+    clock.tick(10)
 
 x = 1
 
@@ -137,7 +178,7 @@ while x <= len(questions):
     done = False
     ans = False
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
             win.fill(red)
             text = "Question " + str(x) + ": " + questions[x-1]
             textSurface = font.render(text, True, white)
@@ -187,7 +228,7 @@ while x <= len(questions):
 
 while True:
     for event in pygame.event.get():
-        if event.type == pygame.KEYDOWN:
+        if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
             win.fill(red)
             text = allplayer[1][0] + ": " + str(allplayer[1][2])
             text2 = allplayer[2][0] + ": " + str(allplayer[2][2])
