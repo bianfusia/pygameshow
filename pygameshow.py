@@ -94,6 +94,8 @@ def Inputtextbox():
 #TODO: set variable to capture team button
 
 #change background color
+pygame.mixer.music.load("intro.mp3")
+pygame.mixer.music.play(-1,0.0)
 red = [219,124,124]
 white = [255,255,255]
 green = [102,204,0]
@@ -106,10 +108,6 @@ font = pygame.font.Font('freesansbold.ttf', 30)
 spacing = 40
 width = 1280
 height = 720
-while spacing < width:
-    pygame.draw.circle(winsur, grey, (spacing,40), 20)
-    pygame.draw.circle(winsur, grey, (spacing,720-40), 20)
-    spacing += 80
 #recttop = pygame.Rect(0,0,1280,30)
 #winsur.fill(white,recttop)
 textSurface = font.render(text, True, white)
@@ -120,11 +118,16 @@ pygame.display.flip()
 
 player = 1
 points = 0
+drawing = 40
 spacing = 40
 prespacing = 1240
 clock = pygame.time.Clock()
 
 while player <= player_no:
+    while drawing < width:
+        pygame.draw.circle(winsur, grey, (drawing,40), 20)
+        pygame.draw.circle(winsur, grey, (drawing,720-40), 20)
+        drawing += 80
     if spacing >= 1280:
         spacing = 40
     pygame.draw.circle(winsur, grey, (prespacing,40), 20)
@@ -179,6 +182,8 @@ while x <= len(questions):
     ans = False
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
+            pygame.mixer.pause()
+            pygame.mixer.music.load("ding.mp3")
             win.fill(red)
             text = "Question " + str(x) + ": " + questions[x-1]
             textSurface = font.render(text, True, white)
@@ -189,6 +194,7 @@ while x <= len(questions):
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == allplayer[1][1]:
+                            pygame.mixer.music.play(0,0.0)
                             team = 1
                             win.fill(red)
                             text = allplayer[1][0] + "!!!"
@@ -197,6 +203,7 @@ while x <= len(questions):
                             pygame.display.flip()
                             done = True
                         elif event.key == allplayer[2][1]:
+                            pygame.mixer.music.play(0,0.0)
                             team = 2
                             win.fill(red)
                             text = allplayer[2][0] + "!!!"
