@@ -3,7 +3,7 @@
 #have to declare pygame.init() at start for pygame to work.
 #to read xlsx https://openpyxl.readthedocs.io/en/stable/
 #https://stackoverflow.com/questions/34754077/openpyxl-read-only-one-column-from-excel-file-in-python
-
+#https://www.pygame.org/wiki/TextWrap
 import pygame
 from openpyxl import load_workbook
 
@@ -91,7 +91,43 @@ def Inputtextbox():
 
     
     
-#TODO: set variable to capture team button
+def drawText(surface, text, color, rect, font, aa=False, bkg=None):
+    rect = pygame.Rect(rect)
+    y = rect.top
+    lineSpacing = -2
+
+    # get the height of the font
+    fontHeight = font.size("Tg")[1]
+
+    while text:
+        i = 1
+
+        # determine if the row of text will be outside our area
+        if y + fontHeight > rect.bottom:
+            break
+
+        # determine maximum width of line
+        while font.size(text[:i])[0] < rect.width and i < len(text):
+            i += 1
+
+        # if we've wrapped the text, then adjust the wrap to the last word      
+        if i < len(text): 
+            i = text.rfind(" ", 0, i) + 1
+
+        # render the line and blit it to the surface
+        if bkg:
+            image = font.render(text[:i], 1, color, bkg)
+            image.set_colorkey(bkg)
+        else:
+            image = font.render(text[:i], aa, color)
+
+        surface.blit(image, (rect.left, y))
+        y += fontHeight + lineSpacing
+
+        # remove the text we just blitted
+        text = text[i:]
+
+    return text
 
 #change background color
 pygame.mixer.music.load("intro.mp3")
@@ -173,6 +209,7 @@ while player <= player_no:
     clock.tick(10)
 
 x = 1
+textrect = (100,100,1000,550)
 
 while x <= len(questions):
 #    questioning = False
@@ -186,8 +223,7 @@ while x <= len(questions):
             pygame.mixer.music.load("ding.mp3")
             win.fill(red)
             text = "Question " + str(x) + ": " + questions[x-1]
-            textSurface = font.render(text, True, white)
-            win.blit(textSurface,(350,300))
+            drawText(winsur, text, white, textrect, font)
             pygame.display.flip()
             #questioning = True
             while not done:
@@ -233,7 +269,32 @@ while x <= len(questions):
                             x += 1
 
 
+
+player = 1
+points = 0
+drawing = 40
+spacing = 40
+prespacing = 1240
+clock = pygame.time.Clock()
+pygame.mixer.music.load("intro.mp3")
+pygame.mixer.music.play(-1,0.0)
+
+while drawing < width:
+    pygame.draw.circle(winsur, grey, (drawing,40), 20)
+    pygame.draw.circle(winsur, grey, (drawing,720-40), 20)
+    drawing += 80
+
 while True:
+    if spacing >= 1280:
+        spacing = 40
+    pygame.draw.circle(winsur, grey, (prespacing,40), 20)
+    pygame.draw.circle(winsur, yellow, (spacing,40), 20)
+    pygame.draw.circle(winsur, grey, (prespacing,720-40), 20)
+    pygame.draw.circle(winsur, yellow, (spacing,720-40), 20)
+    spacing += 80
+    prespacing += 80
+    if prespacing >= 1280:
+        prespacing = 40
     for event in pygame.event.get():
         if event.type == pygame.KEYDOWN or event.type == pygame.MOUSEBUTTONDOWN:
             win.fill(red)
@@ -245,6 +306,8 @@ while True:
             win.blit(textSurface,(350,300))
             win.blit(textSurface2,(400,450))
             pygame.display.flip()
+    pygame.display.flip()
+    clock.tick(10)
 
 #pygame window title.
 pygame.display.set_caption("Pygame Show by Bianfusia")
